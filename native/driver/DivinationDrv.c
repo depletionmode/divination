@@ -1,3 +1,7 @@
+/*
+ * @depletionmode 2019
+ */
+
 #include <Wdm.h>
 
 static const UNICODE_STRING DivpDeviceName = RTL_CONSTANT_STRING(L"\\Device\\Divination");
@@ -49,7 +53,7 @@ DivDispatchFastIoDeviceControl (
     _In_ ULONG OutputBufferLength,
     _In_ ULONG IoControlCode,
     _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject)
+    _In_ struct _DEVICE_OBJECT *DeviceObject
     );
 
 #pragma alloc_text(INIT, DriverEntry)
@@ -66,14 +70,14 @@ typedef struct _DIV_CONTEXT {
 } DIV_CONTEXT, *PDIV_CONTEXT;
 
 typedef struct _DIV_MDL_NODE {
-    ULONG_PTR Address;
+    PVOID Address;
     PMDL Mdl;
 
     BOOLEAN Locked;
 
     LIST_ENTRY ListEntry;
 
-} DIV_MDL_NODE; *PDIV_MDL_NODE;
+} DIV_MDL_NODE, *PDIV_MDL_NODE;
 
 #define POOL_TAG_(n) #@n
 #define POOL_TAG(n) POOL_TAG_(n##seD)
@@ -82,13 +86,14 @@ static DIV_CONTEXT DivContext = { 0 };
 
 NTSTATUS
 _unmapVaFromUserModeProcess (
-    _In_ UserModeVirtualAddress
+    _In_ ULONG_PTR UserModeVirtualAddress
     );
 
 NTSTATUS
 _mapVaIntoUserModeProcess (
-    _In_ PVOID VirtualAddress
-    _Out_ PVOID* UserModeVirtualAddress
+    _In_ PVOID VirtualAddress,
+    _In_ ULONG Size,
+    _Out_ ULONG_PTR* UserModeVirtualAddress
     );
 
 NTSTATUS
@@ -104,7 +109,7 @@ DriverEntry (
     PAGED_CODE();
 
     DivContext.FastIoDispatchTbl.SizeOfFastIoDispatch = sizeof(FAST_IO_DISPATCH);
-    DivContext.FastIoDispatchTbl.FastIoDeviceContext = (PFAST_IO_DEVICE_CONTROL)DivDispatchFastIoDeviceControl;
+    DivContext.FastIoDispatchTbl.FastIoDeviceControl = (PFAST_IO_DEVICE_CONTROL)DivDispatchFastIoDeviceControl;
 
     DriverObject->DriverUnload = DivDriverUnload;
     DriverObject->FastIoDispatch = &DivContext.FastIoDispatchTbl;
@@ -114,8 +119,8 @@ DriverEntry (
                             0,
                             (PUNICODE_STRING)&DivpDeviceName,
                             FILE_DEVICE_UNKNOWN,
-                            FILE_DEVIDE_SECURE_OPEN,
-                            FASLE,
+                            FILE_DEVICE_SECURE_OPEN,
+                            FALSE,
                             &DivContext.DeviceObject);
     if (!NT_SUCCESS(status)) {
         goto end;
@@ -127,7 +132,7 @@ DriverEntry (
         goto end;
     }
 
-    InitializeListHead(&DivContext.MdlList));
+    InitializeListHead(&DivContext.MdlList);
 
 end:
     return status;
@@ -143,7 +148,7 @@ DivDriverUnload (
     PAGED_CODE();
 
     if (NULL != DivContext.DeviceObject) {
-        IoDeleteSymbolicLink((PUNICODE_STRING)&DivWin32DeviceName);
+        IoDeleteSymbolicLink((PUNICODE_STRING)&DivpWin32DeviceName);
         IoDeleteDevice(DivContext.DeviceObject);
         DivContext.DeviceObject = NULL;
     }
@@ -151,7 +156,7 @@ DivDriverUnload (
 
 NTSTATUS
 DivDispatchCreate (
-    _In_ PDEVICE_OBJECT DeviceObject;
+    _In_ PDEVICE_OBJECT DeviceObject,
     _In_ PIRP Irp
     )
 {
@@ -181,7 +186,7 @@ DivDispatchFastIoDeviceControl (
     _In_ struct _DEVICE_OBJECT *DeviceObject
     )
 {
-    NTSTATUS success;
+    NTSTATUS status;
     ULONG responseLength = 0;
 
     UNREFERENCED_PARAMETER(Wait);
@@ -203,16 +208,16 @@ DivDispatchFastIoDeviceControl (
             ProbeForRead(InputBuffer, sizeof(ULONG), 1);
             ProbeForWrite(OutputBuffer, sizeof(ULONG64), 1);
 
-        } __except (EXECEPTION_EXECUTE_HANDLER) {
-            status = GetExceptionCode()
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = GetExceptionCode();
             goto end;
         }
 
         __try {
             *(PULONG64)OutputBuffer = __readmsr(*(PULONG)InputBuffer);
 
-        } __except (EXECEPTION_EXECUTE_HANDLER) {
-            status = GetExceptionCode()
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = GetExceptionCode();
             goto end;
         }
 
@@ -223,6 +228,8 @@ DivDispatchFastIoDeviceControl (
     case DIV_IOCTL_MAP_IOSPACE:
     {
         PDIV_MAP_REQUEST request;
+        PHYSICAL_ADDRESS pa;
+        PVOID va;
 
         if (InputBufferLength < sizeof(DIV_MAP_REQUEST) ||
             OutputBufferLength < sizeof(ULONG_PTR)) {
@@ -234,22 +241,22 @@ DivDispatchFastIoDeviceControl (
             ProbeForRead(InputBuffer, sizeof(DIV_MAP_REQUEST), 1);
             ProbeForWrite(OutputBuffer, sizeof(ULONG_PTR), 1);
 
-        } __except (EXECEPTION_EXECUTE_HANDLER) {
-            status = GetExceptionCode()
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = GetExceptionCode();
             goto end;
         }
 
         request = (PDIV_MAP_REQUEST)InputBuffer;
 
-        pa.QuadPart = request.PhysicalAddress;
+        pa.QuadPart = (LONGLONG)request->PhysicalAddress;
 
-        va = MmMapIoSpace(pa, request.Size, MmNonCached);
+        va = MmMapIoSpace(pa, request->Size, MmNonCached);
         if (NULL == va) {
             status = STATUS_INSUFFICIENT_RESOURCES;
             goto end;
         }
 
-        status = _mapVaIntoUserModeProcess(va, OutputBuffer);
+        status = _mapVaIntoUserModeProcess(va, (ULONG)request->Size, OutputBuffer);
         if (!NT_SUCCESS(status)) {
             goto end;
         }
@@ -260,22 +267,18 @@ DivDispatchFastIoDeviceControl (
 
     case DIV_IOCTL_UNMAP_IOSPACE:
     {
-        PDIV_UNMAP_REQUEST request;
-
         if (InputBufferLength < sizeof(ULONG_PTR)) {
             status = STATUS_INVALID_PARAMETER;
             goto end;
         }
 
         __try {
-            ProbeForRead(InputBuffer, sizeof(DIV_MAP_REQUEST), 1);
+            ProbeForRead(InputBuffer, sizeof(ULONG_PTR), 1);
 
-        } __except (EXECEPTION_EXECUTE_HANDLER) {
-            status = GetExceptionCode()
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = GetExceptionCode();
             goto end;
         }
-
-        request = (PDIV_UNMAP_REQUEST)InputBuffer;
 
         status = _unmapVaFromUserModeProcess(*(PULONG_PTR)InputBuffer);
     }
@@ -287,29 +290,32 @@ DivDispatchFastIoDeviceControl (
 
 end:
     IoStatus->Information = responseLength;
-    IoStatus = status;
+    IoStatus->Status = status;
 
     return status == STATUS_SUCCESS;
 }
 
 NTSTATUS
 _mapVaIntoUserModeProcess (
-    _In_ PVOID VirtualAddress
-    _Out_ PVOID* UserModeVirtualAddress
+    _In_ PVOID VirtualAddress,
+    _In_ ULONG Size,
+    _Out_ ULONG_PTR* UserModeVirtualAddress
     )
 {
     NTSTATUS status;
     PDIV_MDL_NODE mdlNode;
 
-    mdlNode = ExAllocatePoolWithTag(NonPagedPoolNx, request.Size, POOL_TAG(M));
+    mdlNode = ExAllocatePoolWithTag(NonPagedPoolNx, 
+                                    sizeof(DIV_MDL_NODE), 
+                                    POOL_TAG(M));
     if (NULL == mdlNode) {
         status = STATUS_INSUFFICIENT_RESOURCES;
         goto end;
     }
-    RtlZeroMemory(mdlNode, sizeof(SME_MDL_NODE));
+    RtlZeroMemory(mdlNode, sizeof(DIV_MDL_NODE));
 
     mdlNode->Mdl = IoAllocateMdl(VirtualAddress,
-                                 request.Size,
+                                 Size,
                                  FALSE,
                                  FALSE,
                                  NULL);
@@ -322,25 +328,25 @@ _mapVaIntoUserModeProcess (
         MmProbeAndLockPages(mdlNode->Mdl, KernelMode, IoModifyAccess);
         mdlNode->Locked = TRUE;
 
-        mdlNode->Address = (ULONG_PTR)MmMapLockedPagesSpecifyCache(mdlNode->Mdl,
-                                                                    UserMode,
-                                                                    MmNonCached,
-                                                                    NULL,
-                                                                    FALSE,
-                                                                    NormalPagePriority);
-        if (NULL = mdlNode->Address) {
+        mdlNode->Address = MmMapLockedPagesSpecifyCache(mdlNode->Mdl,
+                                                        UserMode,
+                                                        MmNonCached,
+                                                        NULL,
+                                                        FALSE,
+                                                        NormalPagePriority);
+        if (NULL == mdlNode->Address) {
             status = STATUS_INSUFFICIENT_RESOURCES;
             goto end;
         }
 
-    } __except (EXECEPTION_EXECUTE_HANDLER) {
-        status = GetExceptionCode()
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        status = GetExceptionCode();
         goto end;
     }
 
     InsertTailList(&DivContext.MdlList, &mdlNode->ListEntry);
 
-    *UserModeVirtualAddress = mdlNode->Address;
+    *UserModeVirtualAddress = (ULONG_PTR)mdlNode->Address;
 
     status = STATUS_SUCCESS;
 
@@ -371,20 +377,19 @@ end:
 
 NTSTATUS
 _unmapVaFromUserModeProcess (
-    _In_ UserModeVirtualAddress
+    _In_ ULONG_PTR UserModeVirtualAddress
     )
 {
-    PDIV_UNMAP_REQUEST request;
-    PHYSICAL_ADDRESS pa;
-    PVOID va;
+    NTSTATUS status;
     PLIST_ENTRY entry;
     PMDL mdl = NULL;
+    PDIV_MDL_NODE mdlNode;
 
     entry = DivContext.MdlList.Flink;
     while (entry != &DivContext.MdlList) {
         mdlNode = CONTAINING_RECORD(entry, DIV_MDL_NODE, ListEntry);
 
-        if (mdlNode->Address = UserModeVirtualAddress) {
+        if (mdlNode->Address == (PVOID)UserModeVirtualAddress) {
             mdl = mdlNode->Mdl;
             RemoveEntryList(&mdlNode->ListEntry);
             ExFreePoolWithTag(mdlNode, POOL_TAG(M));
@@ -399,9 +404,9 @@ _unmapVaFromUserModeProcess (
         goto end;
     }
 
-    MmUnmapLockedPages(UserModeVirtualAddress, mdl);
+    MmUnmapLockedPages((PVOID)UserModeVirtualAddress, mdl);
     MmUnlockPages(mdl);
-    MmUnmapIoSpace(mdl->StartVa);
+    MmUnmapIoSpace(mdl->StartVa, mdl->Size);
     IoFreeMdl(mdl);
 
     status = STATUS_SUCCESS;
