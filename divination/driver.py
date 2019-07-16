@@ -12,7 +12,7 @@ class DriverControlCodes(Enum):
 
 class Driver():
     def __init__(self):
-        self.hDriver = win32file.CreateFile(r'\Device\Desperado', 
+        self.hDriver = win32file.CreateFile(r'\Device\Divination', 
                                             win32file.GENERIC_READ | win32file.GENERIC_WRITE, 
                                             0, 
                                             None, 
