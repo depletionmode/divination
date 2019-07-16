@@ -2,8 +2,3 @@
 native/driver/x64/
 native/driver/Debug
 native/driver/Release
-*.obj
-*.pdb
-*.sys
-*.log
-*.tlog
