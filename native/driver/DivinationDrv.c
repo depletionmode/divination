@@ -11,18 +11,14 @@ static const UNICODE_STRING DivpWin32DeviceName = RTL_CONSTANT_STRING(L"\\??\\Di
 #define DIV_IOCTL_MAP_PHYSMEM      0x04
 #define DIV_IOCTL_UNMAP_PHYSMEM    0x05
 
+#define DIV_IOCTL_ALLOC_PHYSMEM    0x0a
+#define DIV_IOCTL_FREE_PHYSMEM     0x0b
+
 typedef struct _DIV_MAP_REQUEST {
     PVOID PhysicalAddress;
     SIZE_T Size;
 
 } DIV_MAP_REQUEST, *PDIV_MAP_REQUEST;
-
-typedef struct _DIV_UNMAP_REQUEST {
-    PVOID PhysicalAddress;
-    PVOID VirtualAddress;
-    SIZE_T Size;
-
-} DIV_UNMAP_REQUEST, *PDIV_UNMAP_REQUEST;
 
 DRIVER_INITIALIZE DriverEntry;
 DRIVER_UNLOAD DivDriverUnload;
@@ -266,7 +262,7 @@ DivDispatchFastIoDeviceControl (
     {
         PDIV_UNMAP_REQUEST request;
 
-        if (InputBufferLength < sizeof(DIV_UNMAP_REQUEST)) {
+        if (InputBufferLength < sizeof(ULONG_PTR)) {
             status = STATUS_INVALID_PARAMETER;
             goto end;
         }
@@ -281,8 +277,7 @@ DivDispatchFastIoDeviceControl (
 
         request = (PDIV_UNMAP_REQUEST)InputBuffer;
 
-        status = _unmapVaFromUserModeProcess(request.VirtualAddress);
-
+        status = _unmapVaFromUserModeProcess(*(PULONG_PTR)InputBuffer);
     }
 
     default:
