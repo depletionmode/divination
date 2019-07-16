@@ -1,1 +1,7 @@
 .vscode/
+native/driver/x64/
+*.obj
+*.pdb
+*.sys
+*.log
+*.tlog
