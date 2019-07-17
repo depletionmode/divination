@@ -46,6 +46,11 @@ class Driver():
         out_buf = self._transact(DriverControlCodes.READ_MSR, in_buf, 4)    # returns msr value
         return struct.unpack("@Q", out_buf)[0]
 
+    def read_pcicfg(self, bus, device, function):
+        in_buf = struct.pack("@III", bus, device, function)
+        out_buf = self._transact(DriverControlCodes.READ_PCICFG, in_buf, 0x100)    # returns pci cfg
+        return out_buf
+
     @staticmethod
     def ReadMappedMemory(virt_addr, size):
         return win32gui.PyGetMemory(virt_addr, size)

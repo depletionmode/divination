@@ -29,12 +29,36 @@ hexdump.hexdump(spi_bar[0:])
 
 spi_x00 = struct.unpack("<I", spi_bar[:4])[0]
 print("""
-SPIx00: {:#x} {:#032b}
+SPI_CNTRL0 @ SPIx00: {:#x} {:#032b}
 --> SPI_READMODE @ SPIx00[30:29 + 18] : {:#b}
 --> SPI_CLKGATE @ SPIx00[28] : {:#b}
+--> SPI_HOSTACCESSROMEN @ SPIx00[23] : {:#b}
+--> SPI_ACCESSMACROMEN @ SPIx00[22] : {:#b}
+--> SPI_ARBENABLE @ SPIx00[19] : {:#b}
 """.format(
     spi_x00,
     spi_x00,
     (((spi_x00 >> 29) & 3) << 1) | ((spi_x00 >> 18) & 1),
-    (spi_x00 >> 28) & 1
+    (spi_x00 >> 28) & 1,
+    (spi_x00 >> 23) & 1,
+    (spi_x00 >> 22) & 1,
+    (spi_x00 >> 19) & 1
 ))
+
+spi_x0C = struct.unpack("<I", spi_bar[0xc:0xc+4])[0]
+print("""
+SPI_CNTRL1 @ SPIx0C: {:#x} {:#032b}
+--> SPI_BYTECMD @ SPIx0C[31:24] : {:#x}
+--> SPI_WAITCNT @ SPIx0C[21:16] : {:#x}
+--> SPI_PARAMS @ SPIx0C[7:0] : {:#x}
+""".format(
+    spi_x0C,
+    spi_x0C,
+    (spi_x0C >> 24) & 0xff,
+    (spi_x0C >> 16) & 0x3f,
+    spi_x0C & 0xff
+))
+
+print('SPI_FIFO @ SPIx[C6:80]:')
+spi_fifo = spi_bar[0x80:0xc6]
+hexdump.hexdump(spi_fifo)

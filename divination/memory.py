@@ -87,3 +87,12 @@ class MemoryObject():
 
     def write(self, offset, buf):
         Driver.WriteMappedMemory(self.virt_addr + offset, buf)
+
+class PciDevice():
+    def __init__(self, bus, device, function):
+        self.bus = bus
+        self.device = device
+        self.function = function
+
+    def read_cfg(self):
+        return Driver.read_pcicfg(self.bus, self.device, self.function)

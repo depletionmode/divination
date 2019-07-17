@@ -2,21 +2,28 @@
  * @depletionmode 2019
  */
 
-#include <Wdm.h>
+#include <Ntddk.h>
 
 static const UNICODE_STRING DivpDeviceName = RTL_CONSTANT_STRING(L"\\Device\\Divination");
 static const UNICODE_STRING DivpWin32DeviceName = RTL_CONSTANT_STRING(L"\\??\\Divination");
 
-#define DIV_IOCTL_READ_PCI_CFG     0x00
-#define DIV_IOCTL_READ_MSR         0x01
+#define DIV_IOCTL_READ_PCICFG   0x00
+#define DIV_IOCTL_READ_MSR      0x01
 
-#define DIV_IOCTL_MAP_IOSPACE      0x02
-#define DIV_IOCTL_UNMAP_IOSPACE    0x03
-#define DIV_IOCTL_MAP_PHYSMEM      0x04
-#define DIV_IOCTL_UNMAP_PHYSMEM    0x05
+#define DIV_IOCTL_MAP_IOSPACE   0x02
+#define DIV_IOCTL_UNMAP_IOSPACE 0x03
+#define DIV_IOCTL_MAP_PHYSMEM   0x04
+#define DIV_IOCTL_UNMAP_PHYSMEM 0x05
 
-#define DIV_IOCTL_ALLOC_PHYSMEM    0x0a
-#define DIV_IOCTL_FREE_PHYSMEM     0x0b
+#define DIV_IOCTL_ALLOC_PHYSMEM 0x0a
+#define DIV_IOCTL_FREE_PHYSMEM  0x0b
+
+typedef struct _DIV_PCICFG_REQUEST {
+    ULONG Bus;
+    ULONG Device;
+    ULONG Function;
+
+} DIV_PCICFG_REQUEST, *PDIV_PCICFG_REQUEST;
 
 typedef struct _DIV_MAP_REQUEST {
     PVOID PhysicalAddress;
@@ -196,6 +203,51 @@ DivDispatchFastIoDeviceControl (
     PAGED_CODE();
 
     switch (IoControlCode) {
+    case DIV_IOCTL_READ_PCICFG:
+    {
+        PDIV_PCICFG_REQUEST request;
+        PCI_SLOT_NUMBER slot;
+        ULONG bytesRead;
+
+#define PCICFG_READ_SIZE 0x100
+
+        if (InputBufferLength < sizeof(DIV_PCICFG_REQUEST) ||
+            OutputBufferLength < PCICFG_READ_SIZE) {
+            status = STATUS_INVALID_PARAMETER;
+            goto end;
+        }
+
+        __try {
+            ProbeForRead(InputBuffer, sizeof(DIV_PCICFG_REQUEST), 1);
+            ProbeForWrite(OutputBuffer, PCICFG_READ_SIZE, 1);
+
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = GetExceptionCode();
+            goto end;
+        }
+
+        request = (PDIV_PCICFG_REQUEST)InputBuffer;
+
+        slot.u.AsULONG = 0;
+        slot.u.bits.DeviceNumber = request->Device;
+        slot.u.bits.FunctionNumber = request->Function;
+
+        bytesRead = HalGetBusDataByOffset(PCIConfiguration,
+                                          request->Bus,
+                                          slot.u.AsULONG,
+                                          OutputBuffer,
+                                          0,
+                                          PCICFG_READ_SIZE);
+        if (0 == bytesRead) {
+            status = STATUS_UNSUCCESSFUL;
+            goto end;
+        }
+
+        status = STATUS_SUCCESS;
+        responseLength = bytesRead;
+
+        break;
+    }
     case DIV_IOCTL_READ_MSR:
     {
         if (InputBufferLength < sizeof(ULONG) ||
