@@ -57,14 +57,15 @@ class MemoryObject():
             if key < 0 or key >= len(self):
                 raise IndexError('Index out of range')
 
-            if not isinstance(value, bytearray):
-                raise TypeError('Invalid type')
-
-            self.write(key, value[0])
+            b = bytearray(1)
+            b[0] = value
+            self.write(key, b)
 
         elif isinstance(key, slice):
+            ii = 0
             for i in range(*key.indices(len(self))):
-                self[i] = value[i]
+                self[i] = value[ii]
+                ii += 1
 
         else:
             raise TypeError('Invalid type')
@@ -85,4 +86,4 @@ class MemoryObject():
         return bytes(Driver.ReadMappedMemory(self.virt_addr + offset, len))
 
     def write(self, offset, buf):
-        Driver.WriteMappedMemory(self.virt_addr, buf)
+        Driver.WriteMappedMemory(self.virt_addr + offset, buf)
