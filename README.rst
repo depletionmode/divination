@@ -9,7 +9,7 @@ divination - Windows iospace and physmem inspection
 Overview
 --------
 
-***divination*** is a python package that exposes a simple interface for transacting 
+*divination* is a python package that exposes a simple interface for transacting 
 with physical memory and IO space on Windows (10+). 
 
 IO and physical memory regions are mapped into the usermode process and are 
