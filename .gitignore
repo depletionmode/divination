@@ -2,3 +2,5 @@
 native/driver/x64/
 native/driver/Debug
 native/driver/Release
+dist/
+divination.egg-info/
