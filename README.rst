@@ -36,13 +36,22 @@ Dependencies
 Installation
 ------------
 
+* Python module
+
 The python module is available off PyPI:
 
     pip install divination
 
+* Kernel module
+
 The required kernel module can be built by installing VS, SDK + WDK and 
 running msbuild under the `native/driver <native/driver>`_ directory from within the VS Developer 
 Command Prompt.
+
+Please **do not (non-test) sign** this kernel module; we do not want to further enable attackers!
+Unless a restrictive DeviceGuard policy is employed, enabling testsigning should be sufficient to allow the driver to run:
+
+    bcdedit /set testsigning on ; shutdown -f -t 0 -r
 
 Usage
 -----
@@ -50,8 +59,7 @@ Usage
 There are currently 3 classes available: PciDevice, Msr and MemoryObject. 
 Examples follow for usage of each.
 
-PciDevice(bus, device, function)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* PciDevice(bus, device, function)
 
     >>> amd_lpc = PciDevice(0, 0x14, 3)     # LPC Bridge @ D14F3
     >>> hexdump.hexdump(amd_lpc.read_cfg()) 
