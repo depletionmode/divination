@@ -1,6 +1,6 @@
 import setuptools
 
-with open('README.md', 'r') as f:
+with open('README.rst', 'r') as f:
     long_description = f.read()
 
 setuptools.setup(
@@ -9,7 +9,6 @@ setuptools.setup(
     author='David Kaplan <@depletionmode>',
     description='Python module for iospace and physmem inspection on Windows',
     long_description=long_description,
-    long_description_content_type='text/markdown',
     url='https://github.com/depletionmode/divination',
     packages=setuptools.find_packages(),
     classifiers=[
@@ -17,5 +16,6 @@ setuptools.setup(
         "Environment :: Win32"
         "Operation System :: Microsoft :: Windows :: Windows 10",
         "License :: OSI Approved :: MIT License"
+        "Development Status :: 4 - Beta"
     ]
 )
