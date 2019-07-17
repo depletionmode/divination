@@ -24,7 +24,7 @@ Features
 --------
 
 * Reading PCI configuration space
-* Reading MSRs (writing MSRS currently unimplemented)
+* Reading MSRs (writing MSRs currently unimplemented)
 * Mapping and RW from/to IO regions
 * Mapping and RW from/to physical memory regions (currently unimplemented)
 
@@ -43,4 +43,3 @@ The python module is available off PyPI:
 The required kernel module can be built by installing VS, SDK + WDK and 
 running msbuild under the `native/driver <native/driver>`_ directory from within the VS Developer 
 Command Prompt.
-
