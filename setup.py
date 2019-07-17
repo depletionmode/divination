@@ -13,9 +13,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Environment :: Win32"
-        "Operation System :: Microsoft :: Windows :: Windows 10",
-        "License :: OSI Approved :: MIT License"
+        "Environment :: Win32 (MS Windows)",
+        "Operating System :: Microsoft :: Windows :: Windows 10",
+        "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta"
     ]
 )
