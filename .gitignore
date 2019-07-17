@@ -5,3 +5,5 @@ native/driver/Release
 dist/
 divination.egg-info/
 build/
+*.pyc
+divination/__pycache__/
