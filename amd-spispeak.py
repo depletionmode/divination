@@ -11,7 +11,7 @@ from divination import *
 
 msr_hwcr = Msr(0xc0010015)
 smmlock = msr_hwcr.read() & 1
-print(smmlock)
+print('Core::X86::Msr::HWCR[SmmLock]: {}\n'.format(smmlock == 1))
 
 print('LPC Bridge @ D14F3 Configuration:')
 lpc_cfg = PciDevice(0, 0x14, 3).read_cfg()

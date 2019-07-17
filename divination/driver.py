@@ -43,7 +43,7 @@ class Driver():
 
     def read_msr(self, msr):
         in_buf = struct.pack("@I", msr)
-        out_buf = self._transact(DriverControlCodes.READ_MSR, in_buf, 4)    # returns msr value
+        out_buf = self._transact(DriverControlCodes.READ_MSR, in_buf, 8)    # returns msr value
         return struct.unpack("@Q", out_buf)[0]
 
     def read_pcicfg(self, bus, device, function):
