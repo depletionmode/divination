@@ -43,7 +43,7 @@ The python module is available off PyPI:
 Kernel module
 ^^^^^^^^^^^^^
 
-The required kernel module can be built by installing VS, SDK + WDK and 
+The required KMDF driver can be built by installing VS, SDK + WDK and 
 running msbuild under the `native/driver <native/driver>`_ directory from within the VS Developer 
 Command Prompt.
 
@@ -88,7 +88,7 @@ Examples follow for usage of each.
 * MemoryObject(base_address, range, mem_type, alloc=False)
 
     >>> spi_bar = MemoryObject(0xfec10000, 0x100, MemoryType.IoSpace)
-    >>> hexdump.hexdump(spi_bar[0:])  # MemoryObjects are sliceable and be read + written to
+    >>> hexdump.hexdump(spi_bar[0:])  # MemoryObjects are sliceable and can be read from + written to
     00000000: 05 21 CC 4F 00 00 00 00  00 00 00 00 6A 00 00 02  .!.O........j...
     00000010: 06 20 04 04 06 04 9F 05  03 0B 0A 02 FF 98 06 02  . ..............
     00000020: 13 07 33 10 08 20 20 20  0C 14 06 0E C0 54 C0 14  ..3..   .....T..
