@@ -3,8 +3,8 @@ import struct
 from enum import Enum
 
 class DriverControlCodes(Enum):
+    READ_PCICFG     = 0x00
     READ_MSR        = 0x01
-    READ_PCI_CFG    = 0x00
     MAP_IOSPACE     = 0x02
     UNMAP_IOSPACE   = 0x03
     MAP_PHYSMEM     = 0x04

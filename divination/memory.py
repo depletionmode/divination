@@ -95,4 +95,11 @@ class PciDevice():
         self.function = function
 
     def read_cfg(self):
-        return Driver.read_pcicfg(self.bus, self.device, self.function)
+        return DRIVER.read_pcicfg(self.bus, self.device, self.function)
+
+class Msr():
+    def __init__(self, msr):
+        self.msr = msr
+
+    def read(self):
+        return DRIVER.read_msr(self.msr)

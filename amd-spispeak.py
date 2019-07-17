@@ -7,22 +7,48 @@ print("""
 AMD Family 17h - SPI ROM interface test code by @depletionmode
 """)
 
-from divination import MemoryObject, MemoryType #, ReadPciConfig
+from divination import *
 
-#amd-spispeak
+msr_hwcr = Msr(0xc0010015)
+smmlock = msr_hwcr.read() & 1
+print(smmlock)
 
-# todo
-# pci_cfg = ReadPciConfig(0, 14, 3)
-# print('LPC Bridge @ D14F3 Configuration:')
-# hexdump.hexdump(pci_cfg)
-# spi_base_addr = (pci_cfg[0xa0] >> 6) << 6
-# spi_rom_enable = (pci_cfg[0xa0] >> 1) & 1
-spi_base_addr = 0xfec10000
-spi_rom_enable = 1
+print('LPC Bridge @ D14F3 Configuration:')
+lpc_cfg = PciDevice(0, 0x14, 3).read_cfg()
+hexdump.hexdump(lpc_cfg)
+lpc_cfg_xA0 = struct.unpack("<I", lpc_cfg[0xa0:0xa0+4])[0]
+spi_base_addr = (lpc_cfg_xA0 >> 6) << 6
+spi_rom_enable = (lpc_cfg_xA0 >> 1) & 1
 print('SPI_BASE_ADDR @ D14F3xA0[31:6] : {}'.format(hex(spi_base_addr)))
 print('SPI_ROM_ENABLE @ D14F3xA0[1] : {}'.format(spi_rom_enable == 1))
 
-spi_bar = MemoryObject(0xfec10000, 0x100, MemoryType.IoSpace)
+def _rom_prot_region_decode(register):
+    rom_base = (register >> 12) & 0xfffff
+    wp = (register >> 10) & 1
+    rp = (register >> 9) & 1
+    range_unit = 0x1000
+    if ((register >> 8) & 1) == 1:
+        range_unit = 0x10000
+    range = register & 0xff
+    rom_end = rom_base+range*range_unit
+    return rom_base, rom_end, wp, rp
+
+rom_prot = struct.unpack("<IIII", lpc_cfg[0x50:0x60])
+rom_prot = [_rom_prot_region_decode(x) for x in rom_prot] 
+print('''
+ROM Protected Ranges:
+--> 0: {:#x}-{:#x} WP={}, RP={}
+--> 1: {:#x}-{:#x} WP={}, RP={}
+--> 2: {:#x}-{:#x} WP={}, RP={}
+--> 3: {:#x}-{:#x} WP={}, RP={}
+'''.format(
+    *rom_prot[0],
+    *rom_prot[1],
+    *rom_prot[2],
+    *rom_prot[3],
+))
+
+spi_bar = MemoryObject(spi_base_addr, 0x100, MemoryType.IoSpace)
 
 print('\nSPI_BAR DUMP:')
 hexdump.hexdump(spi_bar[0:])
