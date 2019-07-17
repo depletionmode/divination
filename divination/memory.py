@@ -1,9 +1,7 @@
 import struct
 from enum import Enum
 from .driver import Driver
-
-# global instance of driver class
-DRIVER = Driver()
+from divination import *
 
 class MemoryType(Enum):
     IoSpace = 1
