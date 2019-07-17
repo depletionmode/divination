@@ -36,13 +36,15 @@ Dependencies
 Installation
 ------------
 
-* Python module
+Python module
+^^^^^^^^^^^^^
 
 The python module is available off PyPI:
 
     pip install divination
 
-* Kernel module
+Kernel module
+^^^^^^^^^^^^^
 
 The required kernel module can be built by installing VS, SDK + WDK and 
 running msbuild under the `native/driver <native/driver>`_ directory from within the VS Developer 
