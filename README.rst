@@ -50,7 +50,8 @@ Usage
 There are currently 3 classes available: PciDevice, Msr and MemoryObject. 
 Examples follow for usage of each.
 
-* PciDevice(bus, device, function)
+PciDevice(bus, device, function)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     >>> amd_lpc = PciDevice(0, 0x14, 3)     # LPC Bridge @ D14F3
     >>> hexdump.hexdump(amd_lpc.read_cfg()) 
@@ -80,7 +81,7 @@ Examples follow for usage of each.
 * MemoryObject(base_address, range, mem_type, alloc=False)
 
     >>> spi_bar = MemoryObject(0xfec10000, 0x100, MemoryType.IoSpace)
-    >>> hexdump.hexdump(spi_bar[0:])  # MemoryObjects are slicable and be read + written to
+    >>> hexdump.hexdump(spi_bar[0:])  # MemoryObjects are sliceable and be read + written to
     00000000: 05 21 CC 4F 00 00 00 00  00 00 00 00 6A 00 00 02  .!.O........j...
     00000010: 06 20 04 04 06 04 9F 05  03 0B 0A 02 FF 98 06 02  . ..............
     00000020: 13 07 33 10 08 20 20 20  0C 14 06 0E C0 54 C0 14  ..3..   .....T..
@@ -97,3 +98,10 @@ Examples follow for usage of each.
     000000D0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
     000000E0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
     000000F0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+
+Contributing
+------------
+
+As you can tell, not all the planned functionality is implemented and I will 
+fill in gaps as my personal needs arise.
+Contributions are, of course, most welcome!
