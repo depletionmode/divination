@@ -12,7 +12,7 @@ class DriverControlCodes(Enum):
 
 class Driver():
     def __init__(self):
-        self.hDriver = win32file.CreateFile(r'\Device\Divination', 
+        self.hDriver = win32file.CreateFile(r'\\.\Divination', 
                                             win32file.GENERIC_READ | win32file.GENERIC_WRITE, 
                                             0, 
                                             None, 
@@ -21,7 +21,7 @@ class Driver():
                                             None)
 
     def _transact(self, ctrl_code, in_buf, out_size=0):
-        return win32file.DeviceIoControl(self.hDriver, ctrl_code, in_buf, out_size)
+        return win32file.DeviceIoControl(self.hDriver, ctrl_code.value, in_buf, out_size)
 
     def map_iospace(self, phys_addr, size):
         in_buf = struct.pack("@QQ", phys_addr, size)

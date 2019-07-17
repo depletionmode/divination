@@ -31,9 +31,9 @@ class MemoryObject():
             raise ValueError('Invalid memory type')
 
     def __del__(self):
-        if self.mem_type == MemoryType.IoSpace:
+        if self.mem_type == MemoryType.IoSpace and self.virt_addr != 0:
             self._unmap_iospace()
-        elif self.mem_type == MemoryType.PhysMem:
+        elif self.mem_type == MemoryType.PhysMem and self.virt_addr != 0:
             pass # todo
 
     def __len__(self):
@@ -47,7 +47,7 @@ class MemoryObject():
             return self.read(key, 1)
 
         elif isinstance(key, slice):
-            return [self[i] for i in xrange(*key.indices(len(self)))]
+            return b''.join([self[i] for i in range(*key.indices(len(self)))])
 
         else:
             raise TypeError('Invalid type')
@@ -63,7 +63,7 @@ class MemoryObject():
             self.write(key, value[0])
 
         elif isinstance(key, slice):
-            for i in xrange(*key.indices(len(self))):
+            for i in range(*key.indices(len(self))):
                 self[i] = value[i]
 
         else:
@@ -82,7 +82,7 @@ class MemoryObject():
         self.virt_addr = 0
 
     def read(self, offset, len):
-        Driver.ReadMappedMemory(self.virt_addr + offset, len) 
+        return bytes(Driver.ReadMappedMemory(self.virt_addr + offset, len))
 
     def write(self, offset, buf):
         Driver.WriteMappedMemory(self.virt_addr, buf)

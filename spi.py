@@ -1,17 +1,20 @@
 import struct
+import hexdump
 
 ### I apologise profusely for the messiness of this code - @depletionmode ###
 
 print("""
 AMD Family 17h - SPI ROM interface test code by @depletionmode
-      """)
+""")
 
 from divination import MemoryObject, MemoryType #, ReadPciConfig
 
-print('LPC Bridge @ D14F3')
+#amd-spispeak
 
 # todo
 # pci_cfg = ReadPciConfig(0, 14, 3)
+# print('LPC Bridge @ D14F3 Configuration:')
+# hexdump.hexdump(pci_cfg)
 # spi_base_addr = (pci_cfg[0xa0] >> 6) << 6
 # spi_rom_enable = (pci_cfg[0xa0] >> 1) & 1
 spi_base_addr = 0xfec10000
@@ -21,7 +24,10 @@ print('SPI_ROM_ENABLE @ D14F3xA0[1] : {}'.format(spi_rom_enable == 1))
 
 spi_bar = MemoryObject(0xfec10000, 0x100, MemoryType.IoSpace)
 
-spi_x00 = struct.unpack("<I", spi_bar[:3])
+print('\nSPI_BAR DUMP:')
+hexdump.hexdump(spi_bar[0:])
+
+spi_x00 = struct.unpack("<I", spi_bar[:4])[0]
 print("""
 SPIx00: {:#x} {:#032b}
 --> SPI_READMODE @ SPIx00[30:29 + 18] : {:#b}

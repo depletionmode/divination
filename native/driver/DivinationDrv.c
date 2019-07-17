@@ -223,6 +223,8 @@ DivDispatchFastIoDeviceControl (
 
         status = STATUS_SUCCESS;
         responseLength = sizeof(ULONG64);
+
+        break;
     }   
 
     case DIV_IOCTL_MAP_IOSPACE:
@@ -263,6 +265,8 @@ DivDispatchFastIoDeviceControl (
 
         status = STATUS_SUCCESS;
         responseLength = sizeof(ULONG_PTR);
+
+        break;
     }
 
     case DIV_IOCTL_UNMAP_IOSPACE:
@@ -281,6 +285,8 @@ DivDispatchFastIoDeviceControl (
         }
 
         status = _unmapVaFromUserModeProcess(*(PULONG_PTR)InputBuffer);
+
+        break;
     }
 
     default:
