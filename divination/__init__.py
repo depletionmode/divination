@@ -11,4 +11,4 @@ except pywintypes.error as error:
         print('divination module error:\n  Failed to open handle to device driver. Is DivinationDrv.sys running?\n  Please see README (https://github.com/depletionmode/divination/blob/master/README.md) for details.')
         sys.exit()
 
-from .memory import MemoryObject, MemoryType, PciDevice, Msr
+from .impl import MemoryObject, MemoryType, PciDevice, Msr

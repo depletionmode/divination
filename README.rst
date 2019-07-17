@@ -17,9 +17,6 @@ read directly with the assistance of pywin32 memory primitives.
 
 The module requires a resident kernel-mode driver.
 
-* Documentation: https://divination.readthedocs.io
-
-
 Features
 --------
 
