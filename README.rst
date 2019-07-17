@@ -41,7 +41,7 @@ The python module is available off PyPI:
     pip install divination
 
 The required kernel module can be built by installing VS, SDK + WDK and 
-running msbuild under the native/driver directory from within the VS Developer 
+running msbuild under the native/driver_ directory from within the VS Developer 
 Command Prompt.
 
 .. _native/driver: https://github.com/depletionmode/divination/native/driver
