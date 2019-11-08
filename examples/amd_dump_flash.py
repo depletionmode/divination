@@ -30,7 +30,6 @@ if not rom_range1_enable and not rom_range2_enable:
 def dump_memory(start, end, filename):
     with open(filename, 'wb') as f:
         page_size = 0x1000
-        end = start + 0x1000 * 100
         for address in tqdm.tqdm(range(start, end, page_size), unit='pages'):
             # dump a page at a time so can update progress
             mem_range = divination.MemoryObject(address, page_size, divination.MemoryType.IoSpace)
