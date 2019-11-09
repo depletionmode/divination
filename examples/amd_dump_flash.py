@@ -25,7 +25,7 @@ print('[+] Rom Address Range 1: 0x{:x}-0x{:x} (enabled={})'.format(rom_range1[0]
 print('[+] Rom Address Range 2: 0x{:x}-0x{:x} (enabled={})'.format(rom_range2[0], rom_range2[1], rom_range2_enable))
 
 if not rom_range1_enable and not rom_range2_enable:
-    print('[!] Neither rom address ranges are enabled according to LPC cfg but no matter, dump will be attempted anyway')
+    print('[!] Neither rom address range is enabled according to LPC cfg but no matter, dump will be attempted anyway')
 
 def dump_memory(start, end, filename):
     with open(filename, 'wb') as f:
