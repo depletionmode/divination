@@ -3,6 +3,7 @@ import os
 
 class LinDriver():
     def __init__(self):
+        os.stat
         try:
             self.fd = os.open('/dev/divination', os.O_TRUNC)
         except:
