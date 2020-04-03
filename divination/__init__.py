@@ -8,10 +8,10 @@ DRIVER = None
 
 try:
     DRIVER = WinDriver()
-except FileNotFoundException as error:
+except FileNotFoundError as error:
     print('divination module error:\n  Failed to open handle to device driver. Is {error} loaded?\n  Please see README (https://github.com/depletionmode/divination/blob/master/README.md) for details.\n')
     sys.exit()
-except NotImplementedException:
+except NotImplementedError:
     print('divination module error:\n  Unsupported OS!')
 
 from .impl import MemoryObject, MemoryType, PciDevice, Msr

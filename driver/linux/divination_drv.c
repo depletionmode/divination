@@ -42,7 +42,7 @@ static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg
         break;
     case DIV_IOCTL_READ_MSR:
         {
-            uint64_t msr;
+            uint32_t msr;
             uint64_t msr_val;
             uint32_t msr_low, msr_high;
             
