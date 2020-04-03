@@ -13,15 +13,14 @@ class Driver():
     def __init__(self):
         self.driver = None
         
-        try:
-            if os == 'Windows':
-                from .windriver import WinDriver
-                self.driver = WinDriver()
-            elif os == 'Linux':
-                from .lindriver import LinDriver
-                self.driver = LinDriver()
-        except:
-            raise FileNotFoundError()
+        if os == 'Windows':
+            from .windriver import WinDriver
+            self.driver = WinDriver()
+        elif os == 'Linux':
+            from .lindriver import LinDriver
+            self.driver = LinDriver()
+        else:
+            raise NotImplementedError()
 
     def map_iospace(self, phys_addr, size):
         in_buf = struct.pack("@QQ", phys_addr, size)

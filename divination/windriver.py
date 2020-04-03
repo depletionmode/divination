@@ -2,13 +2,16 @@ import win32file, win32gui
 
 class WinDriver():
     def __init__(self):
-        self.hDriver = win32file.CreateFile(r'\\.\Divination', 
-                                            win32file.GENERIC_READ | win32file.GENERIC_WRITE, 
-                                            0, 
-                                            None, 
-                                            win32file.OPEN_EXISTING, 
-                                            0, 
-                                            None)
+        try:
+            self.hDriver = win32file.CreateFile(r'\\.\Divination', 
+                                                win32file.GENERIC_READ | win32file.GENERIC_WRITE, 
+                                                0, 
+                                                None, 
+                                                win32file.OPEN_EXISTING, 
+                                                0, 
+                                                None)
+        except:
+            raise FileNotFoundError('Divination.sys')
 
     def transact(self, ctrl_code, in_buf, out_size=0):
         return win32file.DeviceIoControl(self.hDriver, ctrl_code.value, in_buf, out_size)

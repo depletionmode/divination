@@ -3,7 +3,10 @@ import os
 
 class LinDriver():
     def __init__(self):
-        self.fd = os.open('/dev/divination', os.O_TRUNC)
+        try:
+            self.fd = os.open('/dev/divination', os.O_TRUNC)
+        except:
+            raise FileNotFoundError('divination.ko')
 
     def transact(self, ctrl_code, in_buf, out_size=0):
         return fcntl.ioctl(self.fd, 0xc0000000 + ctrl_code.value, in_buf)
