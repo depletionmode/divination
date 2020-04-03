@@ -21,8 +21,8 @@ typedef struct {
 
 } div_pcicfg_read_t;
 
-#define DIV_IOCTL_READ_PCICFG   _IOWR(0xc0,0x00,div_pcicfg_read_t*)
-#define DIV_IOCTL_READ_MSR      _IOWR(0xc0,0x01,uint64_t*)
+#define DIV_IOCTL_READ_PCICFG   _IOWR(0xe0,0x00,div_pcicfg_read_t*)
+#define DIV_IOCTL_READ_MSR      _IOWR(0xe0,0x01,uint64_t*)
 
 //int div_init();
 //void div_exit();
@@ -101,7 +101,7 @@ static int div_init(void)
         goto r_class_create;
     }
     
-    printk(KERN_NOTICE "divination: module loaded\n");
+    printk(KERN_NOTICE "divination: module loaded %lx\n");
 
     return 0;
 

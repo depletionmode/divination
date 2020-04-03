@@ -10,7 +10,7 @@ class LinDriver():
             raise FileNotFoundError('divination.ko')
 
     def transact(self, ctrl_code, in_buf, out_size=0):
-        return fcntl.ioctl(self.fd, 0xc0000000 + ctrl_code.value, in_buf)
+        return fcntl.ioctl(self.fd, 0xc008e000 + ctrl_code.value, in_buf)
 
     @staticmethod
     def ReadMappedMemory(virt_addr, size):
