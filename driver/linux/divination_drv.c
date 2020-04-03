@@ -10,6 +10,8 @@
 #include <asm/msr.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
+#include <linux/pci.h>
+#include <asm/pci_x86.h>
 
 typedef struct {
     uint32_t bus;
@@ -24,9 +26,16 @@ typedef struct {
 #define DIV_IOCTL_READ_PCICFG   _IOWR(0xe0,0x00,div_pcicfg_read_t*)
 #define DIV_IOCTL_READ_MSR      _IOWR(0xe0,0x01,uint64_t*)
 
-//int div_init();
-//void div_exit();
-//int div_ioctl(struct file*, unsigned int, unsigned long);
+static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned int fcn, int off)
+{
+/* arch/x86/pci/direct.c */
+#define PCI_ADDRESS(bus, devfn, off) \
+	(0x80000000 | ((off & 0xF00) << 16) | (bus << 16) \
+	| (devfn << 8) | (off & 0xFC))
+
+    outl(PCI_ADDRESS(bus, PCI_DEVFN(dev, fcn), off), 0xcf8);
+    return inb(0xcfc + (off & 3));
+}
 
 static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg)
 {
@@ -34,9 +43,16 @@ static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg
     case DIV_IOCTL_READ_PCICFG:
         {
             div_pcicfg_read_t pcicfg = { 0 };
+            uint32_t val = 0;
+            int i;
             
             copy_from_user(&pcicfg, (void __user *)arg, sizeof(pcicfg));
-            //TODO impl
+
+            for (i = 0; i < 0x100; i++) {
+                val = _raw_pci_read_byte(pcicfg.bus, pcicfg.device, pcicfg.function, i);
+                pcicfg.cfg_region[i] = val;
+            }
+
             copy_to_user((void __user *)arg, &pcicfg, sizeof(pcicfg));
         }
         break;

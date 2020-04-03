@@ -1,4 +1,3 @@
-import struct
 import platform
 
 class Driver():

@@ -1,5 +1,6 @@
 import win32file, win32gui
 from enum import Enum
+import struct
 
 class DriverControlCodes(Enum):
     READ_PCICFG     = 0x00
