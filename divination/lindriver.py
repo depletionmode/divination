@@ -1,4 +1,5 @@
 import fcntl
+from enum import Enum
 import os
 
 class DriverControlCodes(Enum):

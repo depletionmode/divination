@@ -1,9 +1,11 @@
 import struct
-from enum import Enum
+import platform
 
 class Driver():
     def __init__(self):
         self.driver = None
+
+        os = platform.system()
         
         if os == 'Windows':
             from .windriver import WinDriver

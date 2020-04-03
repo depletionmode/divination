@@ -101,7 +101,7 @@ static int div_init(void)
         goto r_class_create;
     }
     
-    printk(KERN_NOTICE "divination: module loaded %lx\n");
+    printk(KERN_NOTICE "divination: module loaded\n");
 
     return 0;
 
