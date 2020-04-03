@@ -61,8 +61,10 @@ static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg
     return 0;
 }
 
-static const char _device_name[] = "divination";
-static int _char_dev = 0;
+static const char _devname[] = "divination";
+static dev_t _dev = 0;
+static struct cdev _cdev;
+static struct class *_devclass = NULL;
 
 static struct file_operations div_fops = {
     .owner = THIS_MODULE,
@@ -71,22 +73,54 @@ static struct file_operations div_fops = {
 
 static int div_init(void)
 {
-    int res = register_chrdev(0, _device_name, &div_fops);
+    int res;
+    struct device* dev;
+
+    res = alloc_chrdev_region(&_dev, 0, 1, _devname);
     if (res < 0) {
-        printk(KERN_ALERT "divination: failed to register char device (err=%i)\n", res);
+        printk(KERN_ALERT "divination: failed to allocate char device region (err=%i)\n", res);
+        goto r_err;
     }
 
-    _char_dev = res;
-    printk(KERN_NOTICE "divination: module loaded (chardev=%i)\n", _char_dev);
+    cdev_init(&_cdev, &div_fops);
+    res = cdev_add(&_cdev, _dev, 1);
+    if (res < 0) {
+        printk(KERN_ALERT "divination: failed to add char device (err=%i)\n", res);
+        goto r_alloc_region;
+    }
+
+    _devclass = class_create(THIS_MODULE, _devname);
+    if (IS_ERR(_devclass)) {
+        printk(KERN_ALERT "divination: failed to create device class (err=%li)\n", PTR_ERR(_devclass));
+        goto r_dev_add;
+    }
+
+    dev = device_create(_devclass, NULL, _dev, NULL, _devname);
+    if (IS_ERR(dev)) {
+        printk(KERN_ALERT "divination: failed to create device (err=%li)\n", PTR_ERR(dev));
+        goto r_class_create;
+    }
+    
+    printk(KERN_NOTICE "divination: module loaded\n");
 
     return 0;
+
+r_class_create:
+    class_destroy(_devclass);
+r_dev_add:
+    cdev_del(&_cdev);
+r_alloc_region:
+    unregister_chrdev_region(_dev, 1);
+r_err:
+    return -1;
 }
 
 static void div_exit(void)
 {
-    if (_char_dev != 0) {
-        unregister_chrdev(_char_dev, _device_name);
-    }
+    device_destroy(_devclass, _dev);
+    class_destroy(_devclass);
+    cdev_del(&_cdev);
+    unregister_chrdev_region(_dev, 1);
 
     printk(KERN_NOTICE "divination: module unloaded\n");
 }
