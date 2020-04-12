@@ -23,7 +23,7 @@ Features
 * Reading PCI configuration space
 * Reading MSRs (writing MSRs - TODO)
 * Mapping and RW from/to IO regions
-* Mapping and RW from/to physical memory regions (TODO)
+* Mapping and RW from/to physical memory regions (Linux-only - TODO Windows)
 
 Dependencies
 ------------
@@ -57,7 +57,7 @@ Kernel module (Linux)
 ^^^^^^^^^^^^^^^^^^^^^
 
 The Linux kernel module can be built by running make under the `driver/linux <driver/linux>`_ directory.
-The prerequisite dependencies (kernel headers, gcc, etc.) will need to be installed.
+The usual prerequisite dependencies (kernel headers, gcc, etc.) will need to be installed.
 
 Usage
 -----

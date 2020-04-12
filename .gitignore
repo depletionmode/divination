@@ -11,5 +11,6 @@ divination/__pycache__/
 *.ko
 *.cmd
 *.mod*
+*.bin
 modules.order
 Module.symvers
