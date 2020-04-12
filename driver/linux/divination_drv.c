@@ -23,18 +23,9 @@ typedef struct {
 
 } div_pcicfg_read_t;
 
-typedef struct {
-    void* phys_addr;
-    size_t size;
-
-    void* virt_addr;
-
-} div_map_mem_t;
-
 #define DIV_IOCTL_READ_PCICFG   _IOWR(0xe0,0x00,div_pcicfg_read_t*)
 #define DIV_IOCTL_READ_MSR      _IOWR(0xe0,0x01,uint64_t*)
-#define DIV_IOCTL_MAP_IOSPACE   _IOWR(0xe0,0x02,div_map_mem_t*)
-#define DIV_IOCTL_UNMAP_IOSPACE _IOWR(0xe0,0x03,void*)
+#define DIV_IOCTL_MAP_IOSPACE   _IOWR(0xe0,0x02,uint64_t*)
 
 /* global variable to hold phys mem/io space address for subsequent mmap */
 uint64_t _mmap_addr;
@@ -53,8 +44,6 @@ static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned 
 static int div_mmap(struct file* f, struct vm_area_struct* vma)
 {
     int res;
-
-    printk(KERN_NOTICE "divination: map phys/io address (physaddr=%llx) stage2\n", _mmap_addr);
 
     vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
     vma->vm_flags |= VM_IO;
@@ -104,23 +93,9 @@ static long int div_ioctl(struct file* f, unsigned int cmd, unsigned long arg)
         break;
     case DIV_IOCTL_MAP_IOSPACE:
         {
-            ///div_map_mem_t mem_details = { 0 };
-            
-            //copy_from_user(&mem_details, (void __user *)arg, sizeof(mem_details));
-
-            //uint64_t addr;  /* address in phys mem or io space; linux does not differentiate at this level */
             _mmap_addr = 0;
-            copy_from_user(&_mmap_addr, (void __user *)arg, sizeof(_mmap_addr));
-            printk(KERN_NOTICE "divination: map phys/io address (physaddr=%llx) stage1\n", _mmap_addr);
-
-            //copy_to_user((void __user *)arg, &mem_details, sizeof(mem_details));
-        }
-        break;
-    case DIV_IOCTL_UNMAP_IOSPACE:
-        {
-            void* virt_addr = 0;
             
-            copy_from_user(&virt_addr, (void __user *)arg, sizeof(virt_addr));
+            copy_from_user(&_mmap_addr, (void __user *)arg, sizeof(_mmap_addr));
         }
         break;
     default:

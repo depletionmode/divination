@@ -81,10 +81,10 @@ class MemoryObject():
         self.virt_addr = 0
 
     def read(self, offset, len):
-        return bytes(Driver.ReadMappedMemory(self.virt_addr + offset, len))
+        return bytes(DRIVER.ReadMappedMemory(self.virt_addr + offset, len))
 
     def write(self, offset, buf):
-        Driver.WriteMappedMemory(self.virt_addr + offset, buf)
+        DRIVER.WriteMappedMemory(self.virt_addr + offset, buf)
 
 class PciDevice():
     def __init__(self, bus, device, function):

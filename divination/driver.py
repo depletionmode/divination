@@ -33,8 +33,8 @@ class Driver():
     def read_pcicfg(self, bus, device, function):
         return self.driver.read_pcicfg(bus, device, function)
 
-    def ReadMappedMemory(virt_addr, size):
+    def ReadMappedMemory(self, virt_addr, size):
         return self.driver.ReadMappedMemory(virt_addr, size)
 
-    def WriteMappedMemory(virt_addr, buf):
+    def WriteMappedMemory(self, virt_addr, buf):
         return self.driver.WriteMappedMemory(virt_addr, buf)
