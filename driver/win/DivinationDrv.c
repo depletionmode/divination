@@ -12,11 +12,11 @@ static const UNICODE_STRING DivpWin32DeviceName = RTL_CONSTANT_STRING(L"\\??\\Di
 
 #define DIV_IOCTL_MAP_IOSPACE   0x02
 #define DIV_IOCTL_UNMAP_IOSPACE 0x03
-#define DIV_IOCTL_MAP_PHYSMEM   0x04
-#define DIV_IOCTL_UNMAP_PHYSMEM 0x05
+#define DIV_IOCTL_MAP_PHYSMEM   0x04    /* unimplemented */
+#define DIV_IOCTL_UNMAP_PHYSMEM 0x05    /* unimplemented */
 
-#define DIV_IOCTL_ALLOC_PHYSMEM 0x0a
-#define DIV_IOCTL_FREE_PHYSMEM  0x0b
+#define DIV_IOCTL_ALLOC_PHYSMEM 0x0a    /* unimplemented */
+#define DIV_IOCTL_FREE_PHYSMEM  0x0b    /* unimplemented */
 
 typedef struct _DIV_PCICFG_REQUEST {
     ULONG Bus;

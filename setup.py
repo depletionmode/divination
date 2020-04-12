@@ -5,16 +5,15 @@ with open('README.rst', 'r') as f:
 
 setuptools.setup(
     name='divination',
-    version='0.1.0',
+    version='0.2.0',
     author='David Kaplan <@depletionmode>',
-    description='Python module for iospace and physmem inspection on Windows',
+    description='Python module for hardware and physmem inspection',
     long_description=long_description,
     url='https://github.com/depletionmode/divination',
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Environment :: Win32 (MS Windows)",
-        "Operating System :: Microsoft :: Windows :: Windows 10",
+        "Operating System :: OS Independent"
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta"
     ]

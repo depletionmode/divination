@@ -1,6 +1,6 @@
-===================================================
-divination - Windows iospace and physmem inspection
-===================================================
+==========================================
+divination - hardware inspection framework
+==========================================
 
 
 .. image:: https://img.shields.io/pypi/v/divination.svg
@@ -10,25 +10,26 @@ Overview
 --------
 
 *divination* is a python package that exposes a simple interface for transacting 
-with physical memory and IO space on Windows (10+). 
+with physical memory and IO space - cross platform (currently Windows10 and Linux).
 
-IO and physical memory regions are mapped into the usermode process and are 
-read directly with the assistance of pywin32 memory primitives.
+IO and physical memory regions are mapped into the python usermode process and are 
+transacted directly with the assistance of ctypes.
 
-The module requires a resident kernel-mode driver.
+To function, the module requires a resident kernel-mode driver.
 
 Features
 --------
 
 * Reading PCI configuration space
-* Reading MSRs (writing MSRs currently unimplemented)
+* Reading MSRs (writing MSRs - TODO)
 * Mapping and RW from/to IO regions
-* Mapping and RW from/to physical memory regions (currently unimplemented)
+* Mapping and RW from/to physical memory regions (Linux-only - TODO Windows)
 
 Dependencies
 ------------
 
-* pywin32
+* (Windows) pywin32
+* (Linux) <none>
 
 Installation
 ------------
@@ -38,19 +39,25 @@ Python module
 
 The python module is available off PyPI:
 
-    pip install divination
+    pip3 install divination
 
-Kernel module
-^^^^^^^^^^^^^
+Kernel module (Windows)
+^^^^^^^^^^^^^^^^^^^^^^^
 
-The required KMDF driver can be built by installing VS, SDK + WDK and 
-running msbuild under the `native/driver <native/driver>`_ directory from within the VS Developer 
+The KMDF driver can be built by installing VS, SDK + WDK and 
+running msbuild under the `driver/win <driver/win>`_ directory from within the VS Developer 
 Command Prompt.
 
 Please **do not (non-test-)sign** this kernel module; we do not want to further enable attackers!
 Unless a restrictive DeviceGuard policy is employed, enabling testsigning should be sufficient to allow the driver to run:
 
     bcdedit /set testsigning on ; shutdown -f -t 0 -r
+
+Kernel module (Linux)
+^^^^^^^^^^^^^^^^^^^^^
+
+The Linux kernel module can be built by running make under the `driver/linux <driver/linux>`_ directory.
+The usual prerequisite dependencies (kernel headers, gcc, etc.) will need to be installed.
 
 Usage
 -----
@@ -105,10 +112,3 @@ Examples follow for usage of each.
     000000D0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
     000000E0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
     000000F0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
-
-Contributing
-------------
-
-As you can tell, not all the planned functionality is implemented and I will 
-fill in gaps as my personal needs arise.
-Contributions are, of course, most welcome!
