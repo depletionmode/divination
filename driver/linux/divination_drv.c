@@ -36,6 +36,9 @@ typedef struct {
 #define DIV_IOCTL_MAP_IOSPACE   _IOWR(0xe0,0x02,div_map_mem_t*)
 #define DIV_IOCTL_UNMAP_IOSPACE _IOWR(0xe0,0x03,void*)
 
+/* global variable to hold phys mem/io space address for subsequent mmap */
+uint64_t _mmap_addr;
+
 static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned int fcn, int off)
 {
 /* arch/x86/pci/direct.c */
@@ -47,7 +50,26 @@ static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned 
     return inb(0xcfc + (off & 3));
 }
 
-static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg)
+static int div_mmap(struct file* f, struct vm_area_struct* vma)
+{
+    int res;
+
+    printk(KERN_NOTICE "divination: map phys/io address (physaddr=%llx) stage2\n", _mmap_addr);
+
+    vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+    vma->vm_flags |= VM_IO;
+    
+   res = remap_pfn_range(vma, vma->vm_start, PFN_DOWN(_mmap_addr), vma->vm_end - vma->vm_start, vma->vm_page_prot);
+    if (res < 0) {
+        printk(KERN_ALERT "divination: failed to map phys/io address (err=%i, physaddr=%llx)\n", res, _mmap_addr);
+        goto r_err;
+    }
+
+r_err:
+    return res;
+}
+
+static long int div_ioctl(struct file* f, unsigned int cmd, unsigned long arg)
 {
     switch(cmd) {
     case DIV_IOCTL_READ_PCICFG:
@@ -82,12 +104,16 @@ static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg
         break;
     case DIV_IOCTL_MAP_IOSPACE:
         {
-            div_map_mem_t mem_details = { 0 };
+            ///div_map_mem_t mem_details = { 0 };
             
-            copy_from_user(&mem_details, (void __user *)arg, sizeof(mem_details));
-            
+            //copy_from_user(&mem_details, (void __user *)arg, sizeof(mem_details));
 
-            copy_to_user((void __user *)arg, &mem_details, sizeof(mem_details));
+            //uint64_t addr;  /* address in phys mem or io space; linux does not differentiate at this level */
+            _mmap_addr = 0;
+            copy_from_user(&_mmap_addr, (void __user *)arg, sizeof(_mmap_addr));
+            printk(KERN_NOTICE "divination: map phys/io address (physaddr=%llx) stage1\n", _mmap_addr);
+
+            //copy_to_user((void __user *)arg, &mem_details, sizeof(mem_details));
         }
         break;
     case DIV_IOCTL_UNMAP_IOSPACE:
@@ -111,6 +137,7 @@ static struct class *_devclass = NULL;
 
 static struct file_operations div_fops = {
     .owner = THIS_MODULE,
+    .mmap = div_mmap,
     .unlocked_ioctl = div_ioctl
 };
 
