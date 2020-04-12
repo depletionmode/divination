@@ -2,6 +2,7 @@ import fcntl
 from enum import Enum
 import os
 import struct
+import ctypes
 
 class DriverControlCodes(Enum):
     READ_PCICFG     = 0x00
@@ -23,10 +24,13 @@ class LinDriver():
         return fcntl.ioctl(self.fd, 0xc008e000 + ctrl_code.value, buf, True)
 
     def map_iospace(self, phys_addr, size):
-        raise NotImplementedError
+        buf = struct.pack("@QQQ", phys_addr, size, 0)
+        buf = self._transact(DriverControlCodes.MAP_IOSPACE, buf)
+        return struct.unpack("@QQQ", buf)[2]
 
     def unmap_iospace(self, virt_addr):
-        raise NotImplementedError
+        buf = struct.pack("@Q", virt_addr)
+        self._transact(DriverControlCodes.UNMAP_IOSPACE, buf)
 
     def map_physmem(self, phys_addr, size):
         raise NotImplementedError
@@ -46,8 +50,8 @@ class LinDriver():
 
     @staticmethod
     def ReadMappedMemory(virt_addr, size):
-        pass
+        return ctypes.string_at(virt_addr, size)
 
     @staticmethod
     def WriteMappedMemory(virt_addr, buf):
-        pass
+        raise NotImplementedError

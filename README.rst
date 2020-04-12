@@ -1,6 +1,6 @@
-===================================================
-divination - Windows iospace and physmem inspection
-===================================================
+==========================================
+divination - hardware inspection framework
+==========================================
 
 
 .. image:: https://img.shields.io/pypi/v/divination.svg
@@ -12,8 +12,8 @@ Overview
 *divination* is a python package that exposes a simple interface for transacting 
 with physical memory and IO space - cross platform (currently Windows10 and Linux).
 
-IO and physical memory regions are mapped into the usermode process and are 
-read directly with the assistance of pywin32 memory primitives on Windows and <TODO> on Linux.
+IO and physical memory regions are mapped into the python usermode process and are 
+transacted directly with the assistance of ctypes.
 
 To function, the module requires a resident kernel-mode driver.
 
@@ -29,7 +29,7 @@ Dependencies
 ------------
 
 * (Windows) pywin32
-* (Linux) <TODO>
+* (Linux) <none>
 
 Installation
 ------------
@@ -112,10 +112,3 @@ Examples follow for usage of each.
     000000D0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
     000000E0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
     000000F0: 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
-
-Contributing
-------------
-
-As you can tell, not all the planned functionality is implemented and I will 
-fill in gaps as my personal needs arise.
-Contributions are, of course, most welcome!

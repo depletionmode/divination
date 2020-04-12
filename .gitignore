@@ -7,3 +7,7 @@ divination.egg-info/
 build/
 *.pyc
 divination/__pycache__/
+*.o
+*.ko
+*.cmd
+*.mod*

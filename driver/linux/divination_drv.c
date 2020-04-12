@@ -23,8 +23,18 @@ typedef struct {
 
 } div_pcicfg_read_t;
 
+typedef struct {
+    void* phys_addr;
+    size_t size;
+
+    void* virt_addr;
+
+} div_map_mem_t;
+
 #define DIV_IOCTL_READ_PCICFG   _IOWR(0xe0,0x00,div_pcicfg_read_t*)
 #define DIV_IOCTL_READ_MSR      _IOWR(0xe0,0x01,uint64_t*)
+#define DIV_IOCTL_MAP_IOSPACE   _IOWR(0xe0,0x02,div_map_mem_t*)
+#define DIV_IOCTL_UNMAP_IOSPACE _IOWR(0xe0,0x03,void*)
 
 static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned int fcn, int off)
 {
@@ -68,6 +78,23 @@ static long int div_ioctl(struct file* file, unsigned int cmd, unsigned long arg
             msr_val = (uint64_t)msr_high << 32 | msr_low;
 
             copy_to_user((void __user *)arg, &msr_val, sizeof(msr_val));
+        }
+        break;
+    case DIV_IOCTL_MAP_IOSPACE:
+        {
+            div_map_mem_t mem_details = { 0 };
+            
+            copy_from_user(&mem_details, (void __user *)arg, sizeof(mem_details));
+            
+
+            copy_to_user((void __user *)arg, &mem_details, sizeof(mem_details));
+        }
+        break;
+    case DIV_IOCTL_UNMAP_IOSPACE:
+        {
+            void* virt_addr = 0;
+            
+            copy_from_user(&virt_addr, (void __user *)arg, sizeof(virt_addr));
         }
         break;
     default:

@@ -1,1 +1,0 @@
-cmd_/home/depmod/source/divination/driver/linux/divination.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/depmod/source/divination/driver/linux/divination.ko /home/depmod/source/divination/driver/linux/divination.o /home/depmod/source/divination/driver/linux/divination.mod.o ;  true
