@@ -1,0 +1,5 @@
+include README.rst
+include LICENSE
+include driver/win/*
+include driver/linux/*
+include examples/*
