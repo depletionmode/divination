@@ -1,7 +1,6 @@
-==========================================
-divination - hardware inspection framework
-==========================================
-
+===============================================================
+divination - platform, iospace and physmem inspection framework
+===============================================================
 
 .. image:: https://img.shields.io/pypi/v/divination.svg
         :target: https://pypi.python.org/pypi/divination
