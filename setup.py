@@ -5,7 +5,7 @@ with open('README.rst', 'r') as f:
 
 setuptools.setup(
     name='divination',
-    version='2.0.0',
+    version='2.0.1',
     author='David Kaplan <@depletionmode>',
     description='Python module for hardware and physmem inspection',
     long_description=long_description,
