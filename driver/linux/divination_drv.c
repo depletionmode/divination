@@ -48,7 +48,7 @@ static int div_mmap(struct file* f, struct vm_area_struct* vma)
     vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
     vma->vm_flags |= VM_IO;
     
-   res = remap_pfn_range(vma, vma->vm_start, PFN_DOWN(_mmap_addr), vma->vm_end - vma->vm_start, vma->vm_page_prot);
+    res = remap_pfn_range(vma, vma->vm_start, PFN_DOWN(_mmap_addr), vma->vm_end - vma->vm_start, vma->vm_page_prot);
     if (res < 0) {
         printk(KERN_ALERT "divination: failed to map phys/io address (err=%i, physaddr=%llx)\n", res, _mmap_addr);
         goto r_err;
