@@ -28,7 +28,7 @@ typedef struct {
 #define DIV_IOCTL_MAP_IOSPACE   _IOWR(0xe0,0x02,uint64_t*)
 
 /* global variable to hold phys mem/io space address for subsequent mmap */
-uint64_t _mmap_addr;
+uint64_t _mmap_addr = 0;
 
 static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned int fcn, int off)
 {
@@ -43,7 +43,11 @@ static uint32_t _raw_pci_read_byte(unsigned int bus, unsigned int dev, unsigned 
 
 static int div_mmap(struct file* f, struct vm_area_struct* vma)
 {
-    int res;
+    int res = -1;
+
+    if (_mmap_addr == 0) {
+        goto r_err;
+    }
 
     vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
     vma->vm_flags |= VM_IO;
