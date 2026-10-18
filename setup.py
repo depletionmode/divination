@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="divination",
-    version="2.0.1",
+    version="2.1.0",
     author="David Kaplan <@depletionmode>",
     description="Python module for hardware and physmem inspection",
     long_description=Path(__file__).with_name("README.rst").read_text(encoding="utf-8"),
