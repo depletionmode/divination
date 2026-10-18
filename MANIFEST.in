@@ -1,5 +1,16 @@
 include README.rst
 include LICENSE
-include driver/win/*
-include driver/linux/*
-include examples/*
+include pyproject.toml
+include driver/win/*.c
+include driver/win/*.vcxproj
+include driver/linux/*.c
+include driver/linux/Makefile
+recursive-include examples *.py
+recursive-include tests *.py
+prune build
+prune dist
+prune driver/win/x64
+prune driver/win/Debug
+prune driver/win/Release
+global-exclude __pycache__ *.py[cod] *.o *.ko *.cmd *.mod *.mod.c *.mod.o *.bin *.sys *.pdb *.obj *.log
+global-exclude modules.order Module.symvers

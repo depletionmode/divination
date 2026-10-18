@@ -12,21 +12,23 @@ Overview
 with physical memory and IO space - cross platform (currently Windows10 and Linux).
 
 IO and physical memory regions are mapped into the python usermode process and are 
-transacted directly with the assistance of ctypes.
+transacted directly using mmap on Linux and pywin32 on Windows.
 
-To function, the module requires a resident kernel-mode driver.
+Hardware operations require a resident kernel-mode driver; importing the module does not.
+The driver is opened on first use, and errors propagate as Python exceptions.
 
 Features
 --------
 
 * Reading PCI configuration space
-* Reading MSRs (writing MSRs - TODO)
+* Reading and writing MSRs
 * Mapping and RW from/to IO regions
-* Mapping and RW from/to physical memory regions (Linux-only - TODO Windows)
+* Mapping and RW from/to physical memory regions (Linux-only; Windows raises NotImplementedError)
 
 Dependencies
 ------------
 
+* Python 3.9+ on 64-bit x86 Linux or Windows, with 64-bit Python
 * (Windows) pywin32
 * (Linux) <none>
 
@@ -40,15 +42,19 @@ The python module is available off PyPI:
 
     pip3 install divination
 
+For the changes in this checkout, use ``pip3 install .`` and rebuild the matching
+kernel driver; MSR writes require the updated driver.
+
 Kernel module (Windows)
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The KMDF driver can be built by installing VS, SDK + WDK and 
+The WDM driver can be built by installing VS, SDK + WDK and
 running msbuild under the `driver/win <driver/win>`_ directory from within the VS Developer 
 Command Prompt.
 
 Please **do not (non-test-)sign** this kernel module; we do not want to further enable attackers!
-Unless a restrictive DeviceGuard policy is employed, enabling testsigning should be sufficient to allow the driver to run:
+The driver must be test-signed because its process-exit cleanup requires ``/INTEGRITYCHECK``.
+Enable testsigning to load the test-signed driver, subject to system signing policy:
 
     bcdedit /set testsigning on ; shutdown -f -t 0 -r
 
@@ -87,11 +93,18 @@ Examples follow for usage of each.
 
 * Msr(register)
 
+  Use ``write(value)`` to write a 64-bit value. Reads and writes affect the CPU
+  executing the driver request.
+
     >>> amd_hwcr = Msr(0xc0010015)
     >>> hex(amd_hwcr.read())   
     '0x89000111'
 
 * MemoryObject(base_address, range, mem_type, alloc=False)
+
+  Reads and writes must stay within the mapped range; slice assignment cannot
+  resize it. Use ``close()`` or a ``with`` block to release the mapping.
+  Physical memory allocation (``alloc=True``) is not supported.
 
     >>> spi_bar = MemoryObject(0xfec10000, 0x100, MemoryType.IoSpace)
     >>> hexdump.hexdump(spi_bar[0:])  # MemoryObjects are sliceable and can be read from + written to
