@@ -9,14 +9,14 @@ Windows physical RAM mapping and physical-memory allocation are unsupported.
 Installation and drivers
 ------------------------
 
-For the CLI described here, install this checkout (the published 2.1.0 release
-provides the Python API, but predates the CLI)::
+Install version 2.2.0 or later for both the Python API and CLI::
 
-    python -m pip install .
+    python -m pip install --upgrade divination
     python -m divination --help
     python -m divination doctor --json
 
-An installed checkout also provides the equivalent ``divination`` command.
+The package also provides the equivalent ``divination`` command.
+For development, install a source checkout with ``python -m pip install .``.
 On Windows, pip installs pywin32 automatically. Installing the Python package
 does not build or load its kernel driver. Source distributions include driver
 sources; wheels contain only the Python library.
