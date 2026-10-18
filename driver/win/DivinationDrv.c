@@ -339,8 +339,13 @@ DivDeviceControl(PFILE_OBJECT FileObject, BOOLEAN Wait, PVOID InputBuffer,
             slot.u.AsULONG = 0;
             slot.u.bits.DeviceNumber = input.Pci[1];
             slot.u.bits.FunctionNumber = input.Pci[2];
+            /* Legacy control driver: no PCI PnP stack for BUS_INTERFACE_STANDARD.
+             * Keep the existing read path; see the Windows PCI limits in docs/usage.rst. */
+#pragma warning(push)
+#pragma warning(disable: 4996)
             bytesRead = HalGetBusDataByOffset(PCIConfiguration, input.Pci[0],
                                              slot.u.AsULONG, output, 0, sizeof(output));
+#pragma warning(pop)
             status = bytesRead == sizeof(output) ? STATUS_SUCCESS : STATUS_NO_SUCH_DEVICE;
             break;
         }

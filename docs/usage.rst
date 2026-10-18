@@ -56,6 +56,12 @@ After closing clients, stop with ``sc.exe stop Divination``. Rebuild the matchin
 driver when updating the Python package. Hardware addresses and supported MSRs
 vary by machine; the examples below do not discover suitable targets for you.
 
+Windows PCI reads still use the legacy ``HalGetBusDataByOffset`` API. They are
+not supported on systems with both an SDEV ACPI table and virtualization-based
+security enabled: Windows can bug-check on this access. See Microsoft's
+`PCI configuration access guidance <https://learn.microsoft.com/en-us/windows-hardware/drivers/pci/accessing-pci-device-configuration-space>`_.
+A successful CI build does not establish runtime compatibility on those systems.
+
 Choose CLI or Python
 --------------------
 
