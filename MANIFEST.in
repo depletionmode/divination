@@ -5,6 +5,8 @@ include AGENTS.md
 recursive-include docs *.rst
 include driver/win/*.c
 include driver/win/*.vcxproj
+include driver/win/Directory.Build.props
+include driver/win/packages.config
 include driver/linux/*.c
 include driver/linux/Makefile
 recursive-include examples *.py
@@ -14,5 +16,6 @@ prune dist
 prune driver/win/x64
 prune driver/win/Debug
 prune driver/win/Release
+prune driver/win/packages
 global-exclude __pycache__ *.py[cod] *.o *.ko *.cmd *.mod *.mod.c *.mod.o *.bin *.sys *.pdb *.obj *.log
 global-exclude modules.order Module.symvers

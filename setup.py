@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="divination",
-    version="2.1.0",
+    version="2.2.0",
     author="David Kaplan <@depletionmode>",
     description="Python hardware inspection: PCI configuration, MSRs, MMIO, and Linux physical memory",
     long_description=Path(__file__).with_name("README.rst").read_text(encoding="utf-8"),

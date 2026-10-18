@@ -1,4 +1,5 @@
 /* Divination: privileged, synchronous x64 hardware inspection interface. */
+#define POOL_ZERO_DOWN_LEVEL_SUPPORT
 #include <ntifs.h>
 #include <wdmsec.h>
 #include <intrin.h>
@@ -147,11 +148,10 @@ DivCreate(PDEVICE_OBJECT DeviceObject, PIRP Irp)
     if (stack->FileObject->FileName.Length != 0) {
         return DivComplete(Irp, STATUS_OBJECT_NAME_NOT_FOUND);
     }
-    context = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(*context), DIV_POOL_TAG);
+    context = ExAllocatePoolZero(NonPagedPoolNx, sizeof(*context), DIV_POOL_TAG);
     if (context == NULL) {
         return DivComplete(Irp, STATUS_INSUFFICIENT_RESOURCES);
     }
-    RtlZeroMemory(context, sizeof(*context));
     ExInitializeFastMutex(&context->Lock);
     InitializeListHead(&context->Mappings);
     context->Process = PsGetCurrentProcess();
@@ -219,11 +219,10 @@ DivMapIo(PDIV_FILE_CONTEXT Context, const DIV_MAP_REQUEST *Request,
     if (length > MAXULONG) {
         return STATUS_INVALID_PARAMETER;
     }
-    mapping = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(*mapping), DIV_POOL_TAG);
+    mapping = ExAllocatePoolZero(NonPagedPoolNx, sizeof(*mapping), DIV_POOL_TAG);
     if (mapping == NULL) {
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-    RtlZeroMemory(mapping, sizeof(*mapping));
     range.PhysicalAddress.QuadPart = (LONGLONG)(Request->PhysicalAddress - offset);
     range.NumberOfBytes = (SIZE_T)length;
     /* This documented API rejects ranges used as operating-system RAM. */
@@ -340,8 +339,13 @@ DivDeviceControl(PFILE_OBJECT FileObject, BOOLEAN Wait, PVOID InputBuffer,
             slot.u.AsULONG = 0;
             slot.u.bits.DeviceNumber = input.Pci[1];
             slot.u.bits.FunctionNumber = input.Pci[2];
+            /* Legacy control driver: no PCI PnP stack for BUS_INTERFACE_STANDARD.
+             * Keep the existing read path; see the Windows PCI limits in docs/usage.rst. */
+#pragma warning(push)
+#pragma warning(disable: 4996)
             bytesRead = HalGetBusDataByOffset(PCIConfiguration, input.Pci[0],
                                              slot.u.AsULONG, output, 0, sizeof(output));
+#pragma warning(pop)
             status = bytesRead == sizeof(output) ? STATUS_SUCCESS : STATUS_NO_SUCH_DEVICE;
             break;
         }
@@ -409,6 +413,8 @@ DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
     ULONG i;
     UNREFERENCED_PARAMETER(RegistryPath);
 
+    /* Initialize the pool-zeroing fallback for Windows versions before 2004. */
+    ExInitializeDriverRuntime(0);
     ExInitializeFastMutex(&DivFilesLock);
     InitializeListHead(&DivFiles);
 

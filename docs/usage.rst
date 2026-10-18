@@ -9,14 +9,14 @@ Windows physical RAM mapping and physical-memory allocation are unsupported.
 Installation and drivers
 ------------------------
 
-For the CLI described here, install this checkout (the published 2.1.0 release
-provides the Python API, but predates the CLI)::
+Install version 2.2.0 or later for both the Python API and CLI::
 
-    python -m pip install .
+    python -m pip install --upgrade divination
     python -m divination --help
     python -m divination doctor --json
 
-An installed checkout also provides the equivalent ``divination`` command.
+The package also provides the equivalent ``divination`` command.
+For development, install a source checkout with ``python -m pip install .``.
 On Windows, pip installs pywin32 automatically. Installing the Python package
 does not build or load its kernel driver. Source distributions include driver
 sources; wheels contain only the Python library.
@@ -35,6 +35,15 @@ On Windows, build from a Visual Studio developer prompt with SDK/WDK installed::
 
     msbuild driver\win\DivinationDrv.vcxproj /p:Configuration=Release /p:Platform=x64
 
+CI also compiles and links Debug and Release x64 drivers with a pinned SDK/WDK
+NuGet toolchain on Visual Studio 2026. To reproduce that build::
+
+    nuget restore driver/win/packages.config -PackagesDirectory driver/win/packages -NonInteractive
+    msbuild driver\win\DivinationDrv.vcxproj /p:Configuration=Release /p:Platform=x64 /p:UseNuGetWdk=true /p:SignMode=Off
+
+These CI builds are unsigned and do not load the driver or test hardware access.
+The Windows Python tests continue to use simulated drivers.
+
 Use a test-signed build on a test machine configured for test signing; this WDM
 driver requires ``/INTEGRITYCHECK``. From an elevated command prompt, substitute
 the actual absolute path to the built driver::
@@ -46,6 +55,12 @@ The device is ``\\.\Divination`` and permits administrators and SYSTEM.
 After closing clients, stop with ``sc.exe stop Divination``. Rebuild the matching
 driver when updating the Python package. Hardware addresses and supported MSRs
 vary by machine; the examples below do not discover suitable targets for you.
+
+Windows PCI reads still use the legacy ``HalGetBusDataByOffset`` API. They are
+not supported on systems with both an SDEV ACPI table and virtualization-based
+security enabled: Windows can bug-check on this access. See Microsoft's
+`PCI configuration access guidance <https://learn.microsoft.com/en-us/windows-hardware/drivers/pci/accessing-pci-device-configuration-space>`_.
+A successful CI build does not establish runtime compatibility on those systems.
 
 Choose CLI or Python
 --------------------
