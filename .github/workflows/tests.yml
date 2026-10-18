@@ -44,3 +44,27 @@ jobs:
           kernel_headers=$(printf '%s\n' /usr/src/linux-headers-*-generic | sort -V | tail -n 1)
           test -d "$kernel_headers"
           make -C driver/linux KDIR="$kernel_headers" W=1
+
+  windows-driver:
+    runs-on: windows-2025-vs2026
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - name: Restore pinned SDK and WDK
+        run: nuget restore driver/win/packages.config -PackagesDirectory driver/win/packages -NonInteractive
+      - name: Compile and link x64 WDM driver
+        run: >-
+          msbuild driver/win/DivinationDrv.vcxproj /m
+          /p:Configuration=${{ matrix.configuration }} /p:Platform=x64
+          /p:UseNuGetWdk=true /p:SignMode=Off
+          /bl:windows-driver-${{ matrix.configuration }}.binlog
+      - name: Archive build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-driver-${{ matrix.configuration }}-log
+          path: windows-driver-${{ matrix.configuration }}.binlog
+          if-no-files-found: warn

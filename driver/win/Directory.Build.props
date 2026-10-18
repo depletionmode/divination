@@ -1,0 +1,8 @@
+<Project>
+  <!-- Opt in to the pinned NuGet toolchain; normal local builds use the installed WDK. -->
+  <ImportGroup Condition="'$(UseNuGetWdk)' == 'true'">
+    <Import Project="$(MSBuildThisFileDirectory)packages\Microsoft.Windows.WDK.x64.10.0.28000.2526\build\native\Microsoft.Windows.WDK.x64.props" />
+    <Import Project="$(MSBuildThisFileDirectory)packages\Microsoft.Windows.SDK.CPP.x64.10.0.28000.2526\build\native\Microsoft.Windows.SDK.cpp.x64.props" />
+    <Import Project="$(MSBuildThisFileDirectory)packages\Microsoft.Windows.SDK.CPP.10.0.28000.2526\build\native\Microsoft.Windows.SDK.cpp.props" />
+  </ImportGroup>
+</Project>

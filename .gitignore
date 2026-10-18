@@ -12,6 +12,8 @@ htmlcov/
 driver/win/x64/
 driver/win/Debug/
 driver/win/Release/
+driver/win/packages/
+*.binlog
 *.o
 *.ko
 *.cmd

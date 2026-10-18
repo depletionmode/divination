@@ -35,6 +35,15 @@ On Windows, build from a Visual Studio developer prompt with SDK/WDK installed::
 
     msbuild driver\win\DivinationDrv.vcxproj /p:Configuration=Release /p:Platform=x64
 
+CI also compiles and links Debug and Release x64 drivers with a pinned SDK/WDK
+NuGet toolchain on Visual Studio 2026. To reproduce that build::
+
+    nuget restore driver/win/packages.config -PackagesDirectory driver/win/packages -NonInteractive
+    msbuild driver\win\DivinationDrv.vcxproj /p:Configuration=Release /p:Platform=x64 /p:UseNuGetWdk=true /p:SignMode=Off
+
+These CI builds are unsigned and do not load the driver or test hardware access.
+The Windows Python tests continue to use simulated drivers.
+
 Use a test-signed build on a test machine configured for test signing; this WDM
 driver requires ``/INTEGRITYCHECK``. From an elevated command prompt, substitute
 the actual absolute path to the built driver::
