@@ -1,16 +1,21 @@
-TARGET_MODULE:=divination
+TARGET_MODULE := divination
+
 ifneq ($(KERNELRELEASE),)
-	$(TARGET_MODULE)-objs := divination_drv.o
-	obj-m := $(TARGET_MODULE).o
+obj-m := $(TARGET_MODULE).o
+$(TARGET_MODULE)-y := divination_drv.o
 else
-	BUILDSYSTEM_DIR:=/lib/modules/$(shell uname -r)/build
-	PWD:=$(shell pwd)
-all: 
-	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) modules
+KDIR ?= /lib/modules/$(shell uname -r)/build
+# Retain the old override for existing build scripts.
+BUILDSYSTEM_DIR ?= $(KDIR)
+MODULE_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
+.PHONY: all clean load unload
+all:
+	$(MAKE) -C "$(BUILDSYSTEM_DIR)" M="$(MODULE_DIR)" modules
 clean:
-	$(MAKE) -C $(BUILDSYSTEM_DIR) M=$(PWD) clean
+	$(MAKE) -C "$(BUILDSYSTEM_DIR)" M="$(MODULE_DIR)" clean
 load:
-	insmod ./$(TARGET_MODULE).ko
+	insmod "$(MODULE_DIR)/$(TARGET_MODULE).ko"
 unload:
-	rmmod ./$(TARGET_MODULE).ko
+	rmmod $(TARGET_MODULE)
 endif
