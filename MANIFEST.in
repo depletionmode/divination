@@ -1,6 +1,8 @@
 include README.rst
 include LICENSE
 include pyproject.toml
+include AGENTS.md
+recursive-include docs *.rst
 include driver/win/*.c
 include driver/win/*.vcxproj
 include driver/linux/*.c

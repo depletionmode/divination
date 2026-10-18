@@ -70,6 +70,8 @@ Usage
 There are currently 3 classes available: PciDevice, Msr and MemoryObject. 
 Examples follow for usage of each.
 
+See the `usage guide <docs/usage.rst>`_ for CLI commands, Python examples, setup and troubleshooting.
+
 * PciDevice(bus, device, function)
 
     >>> amd_lpc = PciDevice(0, 0x14, 3)     # LPC Bridge @ D14F3
